@@ -2,24 +2,12 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity crontrolador is
+entity controlador is
 	port(
-		clk         : in  bit;
-      clr         : in  bit;
+        clk, clr, call, door_free, lt, eq, gt : in bit;
 		
-		call        : in  bit;          
-      door_free   : in  bit;
-		
-		lt          : in  bit;          
-      eq          : in  bit;          
-      gt          : in  bit;
-		
-		ld_floor    : out bit;          
-      ld_call     : out bit;   
-
-		engine    : out bit;          
-      door    : out bit; 
-	)
+        ld_floor, ld_call, engine, door: out bit 
+	);
 end entity controlador;
 	
 
@@ -88,13 +76,19 @@ begin
             WHEN MOVING_UP_S =>
                 engine      <= '1';        
                 ld_floor    <= '1';   
-                
-                next_state <= ARRIVE_S;    
-                
+                IF eq = '1' THEN
+                    next_state <= ARRIVE_S;    
+                ELSE
+                    next_state <= MOVING_UP_S;
+                END IF;
             WHEN MOVING_DOWN_S =>
                 engine      <= '1';       
-                ld_floor    <= '1';        
-                next_state <= ARRIVE_S;    
+                ld_floor    <= '1';
+                IF eq = '1' THEN
+                    next_state <= ARRIVE_S;    
+                ELSE
+                    next_state <= MOVING_DOWN_S;
+                END IF;
 
             WHEN ARRIVE_S =>
                 engine <= '0'; 
@@ -109,4 +103,4 @@ begin
           END CASE;
     END PROCESS;
 
-end architecture FSM;
+end architecture behav;
