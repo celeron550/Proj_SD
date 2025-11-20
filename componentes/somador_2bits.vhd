@@ -7,7 +7,6 @@ entity somador_2bits is
     port (
         a0, a1, b0, b1 : in bit;
         s0, s1, co : out bit
-
     );
 end entity somador_2bits;
 
