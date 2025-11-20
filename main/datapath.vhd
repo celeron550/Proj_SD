@@ -4,7 +4,7 @@ use IEEE.numeric_std.all;
 
 entity DataPath is
     port (
-        call, clk, clr, ld_current : in bit;
+        call, clk, clr, ld_floor : in bit;
         call_floor : in BIT_VECTOR(1 downto 0);
         moving_up, moving_down, stacionary : out bit;
         display_floor : out BIT_VECTOR(1 downto 0)  
@@ -57,7 +57,7 @@ architecture behav of DataPath is
 begin
     -- registrador do current_floor
     reg_current : component reg2 port map (
-        clk => clk, ld => ld_current, clr => clr,
+        clk => clk, ld => ld_floor, clr => clr,
         d => r_next, q => r_current
     );
     -- registrador do call_floor
