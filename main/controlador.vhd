@@ -44,18 +44,10 @@ architecture behav of comb_controlador is
     signal cs : BIT_VECTOR(2 downto 0);
     signal st_000, st_001, st_010, st_011, st_100, st_101 : bit;
 begin
-    -- cs <= current2 & current1 & current0;
     cs(0) <= current0;
     cs(1) <= current1;
     cs(2) <= current2;
-
-    st_000 <= not cs(2) and not cs(1) and not cs(0);
-    st_001 <= not cs(2) and not cs(1) and cs(0);
-    st_010 <= not cs(2) and cs(1) and not cs(0);
-    st_011 <= not cs(2) and cs(1) and cs(0);
-    st_100 <= cs(2) and not cs(1) and not cs(0);
-    st_101 <= cs(2) and not cs(1) and cs(0);
-
+    
     -- estados mapeados:
     -- 000 -> Init
     -- 001 -> Idle
@@ -63,6 +55,13 @@ begin
     -- 011 -> Moving_up
     -- 100 -> Moving_down
     -- 101 -> Arrive_at_floor
+
+    st_000 <= not cs(2) and not cs(1) and not cs(0);
+    st_001 <= not cs(2) and not cs(1) and cs(0);
+    st_010 <= not cs(2) and cs(1) and not cs(0);
+    st_011 <= not cs(2) and cs(1) and cs(0);
+    st_100 <= cs(2) and not cs(1) and not cs(0);
+    st_101 <= cs(2) and not cs(1) and cs(0);
 
     -- transicao de estado
     next2 <= (st_010 and lt) or
