@@ -13,10 +13,16 @@ architecture behav of reg3 is
 begin
     process(clk, clr)
     begin
-        if clr = '1' then
-            q2 <= '0'; q1 <= '0'; q0 <= '0';
-        elsif rising_edge(clk) then
-            q2 <= d2; q1 <= d1; q0 <= d0;
+        if (clk'event and clk = '1') then
+            if clr = '1' then
+                q2 <= '0';
+                q1 <= '0';
+                q0 <= '0';
+            else
+                q2 <= d2;
+                q1 <= d1;
+                q0 <= d0;
+            end if;
         end if;
     end process;
 end architecture behav;
