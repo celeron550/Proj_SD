@@ -29,46 +29,68 @@ entity comb_controlador is
         current2, current1, current0 : in bit;
         call, door_free, lt, eq, gt : in bit;
         next2, next1, next0 : out bit;
-        ld_floor, ld_call, engine, door : out bit
+        ld_floor, ld_call, engine, door, ctrl_s1, ctrl_s0 : out bit
     );
 end comb_controlador;
 
 architecture behav of comb_controlador is
-    signal cs : std_logic_vector(2 downto 0);
+    -- cs indica o estado atual (current_state)
+    signal cs : BIT_VECTOR(2 downto 0);
 begin
     cs <= current2 & current1 & current0;
 
+    -- estados mapeados:
+    -- 000 -> Init
+    -- 001 -> Idle
+    -- 010 -> Comp (a decisao eh feita aqui)
+    -- 011 -> Moving_up
+    -- 100 -> Moving_down
+    -- 101 -> Arrive_at_floor
+
     -- transicao de estado
     next2 <= ((cs = "010") and lt) or
-             ((cs = "100") and not eq) or
-             ((cs = "101") and not door_free);
+            ((cs = "100") and not eq) or
+            ((cs = "101") and not door_free) or
+            ((cs = "010") and eq) or
+            ((cs = "011") and eq) or
+            ((cs = "100") and eq);
 
     next1 <= ((cs = "000") and call) or
-             ((cs = "001") and call) or
-             ((cs = "010") and gt) or
-             ((cs = "011") and not eq) or
-             ((cs = "101") and not door_free);
+            ((cs = "001") and call) or
+            ((cs = "010") and gt) or
+            ((cs = "011") and not eq);
 
     next0 <= ((cs = "000") and not call) or
-             ((cs = "001") and not call) or
-             ((cs = "010") and eq) or
-             ((cs = "011") and eq) or
-             ((cs = "100") and eq) or
-             ((cs = "101") and door_free);
+            ((cs = "001") and not call) or
+            ((cs = "101") and door_free) or
+            ((cs = "010") and gt) or
+            ((cs = "011") and not eq) or
+            ((cs = "010") and eq) or
+            ((cs = "011") and eq) or
+            ((cs = "100") and eq) or
+            ((cs = "101") and not door_free);
 
     -- saidas
-    -- ld_call: ativo em INIT_S ou IDLE_S quando call = '1'
+    -- ld_call: ativo em Init ou Idle quando call = '1'
     ld_call <= ( (not cs(2) and not cs(1) and not cs(0)) and call ) or
            ( (not cs(2) and not cs(1) and cs(0)) and call );
 
-    -- ld_floor: ativo em MOVING_UP_S ou MOVING_DOWN_S
+    -- ld_floor: ativo em Moving_up ou Moving_down
     ld_floor <= (not cs(2) and cs(1) and cs(0)) or (cs(2) and not cs(1) and not cs(0));
 
-    -- engine: ativo em MOVING_UP_S ou MOVING_DOWN_S
+    -- engine: ativo em Moving_up ou Moving_down
     engine <= (not cs(2) and cs(1) and cs(0)) or (cs(2) and not cs(1) and not cs(0));
 
-    -- door: ativo em ARRIVE_S
+    -- door: ativo em Arrive_at_floor
     door <= (cs(2) and not cs(1) and cs(0));
+
+    -- CHAVES DO MUX (vao ser enviadas pro datapath)
+    -- ctrl_s1: ativo apenas quando o estado é Moving_up (011)
+    ctrl_s1 <= (not cs(2) and cs(1) and cs(0));
+
+    -- ctrl_s0: ativo apenas quando o estado é Moving_down (100)
+    ctrl_s0 <= (cs(2) and not cs(1) and not cs(0));
+
 end architecture behav;
 
 library ieee;
@@ -77,7 +99,7 @@ use ieee.std_logic_1164.all;
 entity controlador is
     port(
         clk, clr, call, door_free, lt, eq, gt : in bit;
-        ld_floor, ld_call, engine, door: out bit 
+        ld_floor, ld_call, engine, door, ctrl_s1, ctrl_s0: out bit 
     );
 end controlador;
 
@@ -98,7 +120,7 @@ architecture behav of controlador is
             current2, current1, current0 : in bit;
             call, door_free, lt, eq, gt : in bit;
             next2, next1, next0 : out bit;
-            ld_floor, ld_call, engine, door : out bit
+            ld_floor, ld_call, engine, door, ctrl_s1, ctrl_s0 : out bit
         );
     end component;
 begin
@@ -107,6 +129,7 @@ begin
         current2 => s2, current1 => s1, current0 => s0,
         call => call, door_free => door_free, lt => lt, eq => eq, gt => gt,
         next2 => n2, next1 => n1, next0 => n0,
-        ld_floor => ld_floor, ld_call => ld_call, engine => engine, door => door
-    );
+        ld_floor => ld_floor, ld_call => ld_call, engine => engine, door => door,
+        ctrl_s1 => ctrl_s1, ctrl_s0 => ctrl_s0
+        );
 end architecture behav;

@@ -4,16 +4,16 @@ use IEEE.numeric_std.all;
 
 entity datapath is
     port (
-        clk       : in  bit;
-        clr       : in  bit;
-        ld_floor  : in  bit;                      
-        ld_call   : in  bit;                       
+        clk, clr, ld_floor, ld_call : in  bit;
+        
+        -- chaves dos MUXs, que vem do controlador:
+        ctrl_s1, ctrl_s0 : in bit;
+
+        -- andar que o elevador foi chamado 
         call_floor_in : in  BIT_VECTOR(1 downto 0);
 
         -- flags para o controlador 
-        lt       : out bit;
-        eq       : out bit;
-        gt       : out bit;
+        lt, eq, gt : out bit;
 
         -- saida para display / monitoramento
         display_floor : out BIT_VECTOR(1 downto 0)
@@ -149,8 +149,8 @@ begin
             i2 => r_sum(0),
             i1 => r_sub(0),
             i0 => r_current(0),
-            s1 => comp_gt,
-            s0 => comp_lt,
+            s1 => ctrl_s1,
+            s0 => ctrl_s0,
             d  => r_next(0)
         );
 
@@ -160,8 +160,8 @@ begin
             i2 => r_sum(1),
             i1 => r_sub(1),
             i0 => r_current(1),
-            s1 => comp_gt,
-            s0 => comp_lt,
+            s1 => ctrl_s1,
+            s0 => ctrl_s0,
             d  => r_next(1)
         );
 
