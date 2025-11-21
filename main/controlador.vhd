@@ -42,8 +42,19 @@ end comb_controlador;
 architecture behav of comb_controlador is
     -- cs indica o estado atual (current_state)
     signal cs : BIT_VECTOR(2 downto 0);
+    signal st_000, st_001, st_010, st_011, st_100, st_101 : bit;
 begin
-    cs <= current2 & current1 & current0;
+    -- cs <= current2 & current1 & current0;
+    cs(0) <= current0;
+    cs(1) <= current1;
+    cs(2) <= current2;
+
+    st_000 <= not cs(2) and not cs(1) and not cs(0);
+    st_001 <= not cs(2) and not cs(1) and cs(0);
+    st_010 <= not cs(2) and cs(1) and not cs(0);
+    st_011 <= not cs(2) and cs(1) and cs(0);
+    st_100 <= cs(2) and not cs(1) and not cs(0);
+    st_101 <= cs(2) and not cs(1) and cs(0);
 
     -- estados mapeados:
     -- 000 -> Init
@@ -54,48 +65,47 @@ begin
     -- 101 -> Arrive_at_floor
 
     -- transicao de estado
-    next2 <= ((cs = "010") and lt) or
-            ((cs = "100") and not eq) or
-            ((cs = "101") and not door_free) or
-            ((cs = "010") and eq) or
-            ((cs = "011") and eq) or
-            ((cs = "100") and eq);
+    next2 <= (st_010 and lt) or
+            (st_100 and not eq) or
+            (st_101 and not door_free) or
+            (st_010 and eq) or
+            (st_011 and eq) or
+            (st_100 and eq);
 
-    next1 <= ((cs = "000") and call) or
-            ((cs = "001") and call) or
-            ((cs = "010") and gt) or
-            ((cs = "011") and not eq);
+    next1 <= (st_000 and call) or
+            (st_001 and call) or
+            (st_010 and gt) or
+            (st_011 and not eq);
 
-    next0 <= ((cs = "000") and not call) or
-            ((cs = "001") and not call) or
-            ((cs = "101") and door_free) or
-            ((cs = "010") and gt) or
-            ((cs = "011") and not eq) or
-            ((cs = "010") and eq) or
-            ((cs = "011") and eq) or
-            ((cs = "100") and eq) or
-            ((cs = "101") and not door_free);
+    next0 <= (st_000 and not call) or
+            (st_001 and not call) or
+            (st_101 and door_free) or
+            (st_010 and gt) or
+            (st_011 and not eq) or
+            (st_010 and eq) or
+            (st_011 and eq) or
+            (st_100 and eq) or
+            (st_101 and not door_free);
 
     -- saidas
     -- ld_call: ativo em Init ou Idle quando call = '1'
-    ld_call <= ( (not cs(2) and not cs(1) and not cs(0)) and call ) or
-           ( (not cs(2) and not cs(1) and cs(0)) and call );
+    ld_call <= (st_000 and call) or (st_001 and call);
 
     -- ld_floor: ativo em Moving_up ou Moving_down
-    ld_floor <= (not cs(2) and cs(1) and cs(0)) or (cs(2) and not cs(1) and not cs(0));
+    ld_floor <= st_011 or st_100;
 
     -- engine: ativo em Moving_up ou Moving_down
-    engine <= (not cs(2) and cs(1) and cs(0)) or (cs(2) and not cs(1) and not cs(0));
-
+    engine <= st_011 or st_100;
+    
     -- door: ativo em Arrive_at_floor
-    door <= (cs(2) and not cs(1) and cs(0));
+    door <= st_101;
 
     -- CHAVES DO MUX (vao ser enviadas pro datapath)
     -- ctrl_s1: ativo apenas quando o estado é Moving_up (011)
-    ctrl_s1 <= (not cs(2) and cs(1) and cs(0));
+    ctrl_s1 <= st_011;
 
     -- ctrl_s0: ativo apenas quando o estado é Moving_down (100)
-    ctrl_s0 <= (cs(2) and not cs(1) and not cs(0));
+    ctrl_s0 <= st_100;
 
 end architecture behav;
 
