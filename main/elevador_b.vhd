@@ -55,6 +55,7 @@ begin
             btn_pressed <= '1';
         else
             btn_pressed <= '0';
+            call_floor <= "00";
         end if;
     end process;
 
