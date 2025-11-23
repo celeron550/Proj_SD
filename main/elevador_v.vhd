@@ -3,7 +3,7 @@ entity Elevador is
         clk, clr, call, door_free : in bit;
         call_floor : in BIT_VECTOR(1 downto 0);
 
-        led_motor, led_door : out bit;
+        led_up, led_down, led_door : out bit;
         display_floor : out BIT_VECTOR(1 downto 0)
     );
 end entity Elevador;
@@ -27,7 +27,7 @@ architecture behav of Elevador is
     );
     end component;
 
-    signal w_ld_floor, w_ld_call, w_lt, w_eq, w_gt, w_ctrl_s1, w_ctrl_s0 : bit;
+    signal w_ld_floor, w_ld_call, w_lt, w_eq, w_gt, w_ctrl_s1, w_ctrl_s0, w_engine : bit;
     
     -- Sinais para fazer o call ser "automatico"
     signal last_call_floor : BIT_VECTOR(1 downto 0);
@@ -59,7 +59,7 @@ begin
         lt => w_lt, eq => w_eq, gt => w_gt,
         ld_floor => w_ld_floor, ld_call => w_ld_call,
         ctrl_s1 => w_ctrl_s1, ctrl_s0 => w_ctrl_s0,
-        engine => led_motor, door => led_door
+        engine => w_engine, door => led_door
     );
 
     Data : datapath port map (
@@ -70,4 +70,8 @@ begin
         lt => w_lt, eq => w_eq, gt => w_gt,
         display_floor => display_floor
     );
+
+    led_up <= w_ctrl_s1;
+    led_down <= w_ctrl_s0;
+    
 end architecture behav;
