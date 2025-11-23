@@ -28,10 +28,34 @@ architecture behav of Elevador is
     end component;
 
     signal w_ld_floor, w_ld_call, w_lt, w_eq, w_gt, w_ctrl_s1, w_ctrl_s0 : bit;
+    
+    -- Sinais para fazer o call ser "automatico"
+    signal last_call_floor : BIT_VECTOR(1 downto 0);
+    signal auto_call, final_call : bit;
+
 begin
 
+    process(clk, clr)
+    begin
+        if (clk'event and clk = '1') then
+            if clr = '1' then
+                last_call_floor <= "00";
+                auto_call <= '0';
+            else        
+                if (call_floor /= last_call_floor) then
+                    auto_call <= '1';
+                else
+                    auto_call <= '0';
+                end if;
+                last_call_floor <= call_floor;
+            end if;
+        end if;
+    end process;
+    
+    final_call <= auto_call or call;
+
     Control : controlador port map (
-        clk => clk, clr => clr, call => call, door_free => door_free,
+        clk => clk, clr => clr, call => final_call, door_free => door_free,
         lt => w_lt, eq => w_eq, gt => w_gt,
         ld_floor => w_ld_floor, ld_call => w_ld_call,
         ctrl_s1 => w_ctrl_s1, ctrl_s0 => w_ctrl_s0,
