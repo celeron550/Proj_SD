@@ -39,9 +39,12 @@ architecture behav of Elevador is
 
 begin
 
-    process (btn_0, btn_1, btn_2, btn_3)
+    process (btn_0, btn_1, btn_2, btn_3, clr)
     begin
-        if btn_3 = '1' and not (btn_2 = '1' or btn_1 = '1' or btn_0 = '1') then
+        if clr = '1' then
+            call_floor <= "00";
+            btn_pressed <= '0';
+        elsif btn_3 = '1' and not (btn_2 = '1' or btn_1 = '1' or btn_0 = '1') then
             call_floor <= "11";
             btn_pressed <= '1';
         elsif btn_2 = '1' and not (btn_3 = '1' or btn_1 = '1' or btn_0 = '1') then
@@ -55,7 +58,6 @@ begin
             btn_pressed <= '1';
         else
             btn_pressed <= '0';
-            call_floor <= "00";
         end if;
     end process;
 
