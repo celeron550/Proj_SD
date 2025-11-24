@@ -26,7 +26,7 @@ architecture behav of Elevador is
         display_floor : out BIT_VECTOR(1 downto 0)
     );
     end component;
-
+    -- sinais internos pra comunicacao entre os componentes
     signal w_ld_floor, w_ld_call, w_lt, w_eq, w_gt, w_ctrl_s1, w_ctrl_s0, w_engine : bit;
     
     signal last_call_floor : BIT_VECTOR(1 downto 0);
@@ -36,7 +36,7 @@ architecture behav of Elevador is
     signal btn_pressed : bit;
 
 begin
-
+    -- process para detectar qual botao foi pressionado e definir o andar chamado
     process (clk, clr)
     begin
         
@@ -48,7 +48,7 @@ begin
         elsif clk'event and clk = '1' then
            
             btn_pressed <= '0';
-            
+            --garante que apenas um botao seja considerado por vez
             if btn_3 = '1' and not (btn_2 = '1' or btn_1 = '1' or btn_0 = '1') then
                 call_floor <= "11";
                 btn_pressed <= '1';
@@ -67,7 +67,7 @@ begin
             
         end if;
     end process;
-
+    -- processo para detectar mudanca de chamada de andar
     process(clk, clr)
     begin
         if (clk'event and clk = '1') then
@@ -103,7 +103,7 @@ begin
         lt => w_lt, eq => w_eq, gt => w_gt,
         display_floor => display_floor
     );
-
+    -- leds q indicam direcao do elevador
     led_up <= w_ctrl_s1;
     led_down <= w_ctrl_s0;
     

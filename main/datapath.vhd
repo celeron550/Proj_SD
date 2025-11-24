@@ -6,7 +6,7 @@ entity datapath is
     port (
         clk, clr, ld_floor, ld_call : in  bit;
         
-        ctrl_s1, ctrl_s0 : in bit;
+        ctrl_s1, ctrl_s0 : in bit; -- sinais pro mux
 
         call_floor_in : in  BIT_VECTOR(1 downto 0);
 
@@ -56,7 +56,7 @@ architecture rtl of datapath is
         );
     end component;
 
-    
+    -- sinais intermediarios
     signal r_current     : BIT_VECTOR(1 downto 0);
     signal r_call_floor  : BIT_VECTOR(1 downto 0);
     signal r_next        : BIT_VECTOR(1 downto 0);
@@ -67,13 +67,13 @@ architecture rtl of datapath is
     signal comp_lt, comp_eq, comp_gt : bit;
 
     
-    signal co_sum, co_sub : bit;
-	 signal load_enable_seguro : bit;
+    signal co_sum, co_sub : bit; -- carry dos somadores
+	signal load_enable_seguro : bit;-- habilita ld do reg so se n tiver no andar chamado
 begin
     
 	 load_enable_seguro <= ld_floor and (not comp_eq);
 
-    reg_current : reg2
+    reg_current : reg2 --reg do andar atual
         port map(
             clk => clk,
             ld  => load_enable_seguro, 
@@ -83,7 +83,7 @@ begin
         );
 
     
-    reg_call_floor : reg2
+    reg_call_floor : reg2 --reg do ultimo andar
         port map(
             clk => clk,
             ld  => ld_call,    
@@ -134,16 +134,16 @@ begin
 
     mux_output_0 : Mux4x1
         port map(
-            i3 => r_current(0),
-            i2 => r_sum(0),
-            i1 => r_sub(0),
-            i0 => r_current(0),
+            i3 => r_current(0), --mantem por seguranca
+            i2 => r_sum(0), -- incrementa
+            i1 => r_sub(0), -- decrementa
+            i0 => r_current(0), -- mantem
             s1 => ctrl_s1,
             s0 => ctrl_s0,
             d  => r_next(0)
         );
 
-    mux_output_1 : Mux4x1
+    mux_output_1 : Mux4x1 --mesma logica do de cima
         port map(
             i3 => r_current(1),
             i2 => r_sum(1),
@@ -154,6 +154,6 @@ begin
             d  => r_next(1)
         );
 
-    display_floor <= r_current;
+    display_floor <= r_current; --atualiza o display com andar atual
 
 end architecture rtl;
