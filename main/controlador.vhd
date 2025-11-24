@@ -91,20 +91,20 @@ begin
     ld_call <= (st_000 and call) or (st_001 and call);
 
     -- ld_floor: ativo em Moving_up ou Moving_down
-    ld_floor <= (st_011 and not eq) or (st_100 and not eq);
+    ld_floor <= st_011 or st_100;
 
     -- engine: ativo em Moving_up ou Moving_down
-    engine <= (st_011 and not eq) or (st_100 and not eq);
+    engine <= st_011 or st_100;
     
     -- door: ativo em Arrive_at_floor
     door <= st_101;
 
     -- CHAVES DO MUX (vao ser enviadas pro datapath)
     -- ctrl_s1: ativo apenas quando o estado é Moving_up (011)
-    ctrl_s1 <= st_011 and not eq;
+    ctrl_s1 <= st_011;
 
     -- ctrl_s0: ativo apenas quando o estado é Moving_down (100)
-    ctrl_s0 <= st_100 and not eq;
+    ctrl_s0 <= st_100;
 
 end architecture behav;
 
