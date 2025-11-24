@@ -4,9 +4,6 @@
 
 ## Estrutura do Projeto
 
-- **reg3.vhd**  
-  Registrador de 3 bits responsável por armazenar o estado atual da máquina de estados do controlador.
-
 - **controlador.vhd**  
   O controlador implementa a FSM definida na HLSM.
 Ela opera sob a metodologia de Modelo de Dois Processos
