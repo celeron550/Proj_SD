@@ -6,16 +6,12 @@ entity datapath is
     port (
         clk, clr, ld_floor, ld_call : in  bit;
         
-        -- chaves dos MUXs, que vem do controlador:
         ctrl_s1, ctrl_s0 : in bit;
 
-        -- andar que o elevador foi chamado 
         call_floor_in : in  BIT_VECTOR(1 downto 0);
 
-        -- flags para o controlador 
         lt, eq, gt : out bit;
 
-        -- saida para display / monitoramento
         display_floor : out BIT_VECTOR(1 downto 0)
     );
 end entity datapath;
@@ -60,31 +56,33 @@ architecture rtl of datapath is
         );
     end component;
 
-    -- sinais internos (2 bits)
+    
     signal r_current     : BIT_VECTOR(1 downto 0);
     signal r_call_floor  : BIT_VECTOR(1 downto 0);
     signal r_next        : BIT_VECTOR(1 downto 0);
     signal r_sum         : BIT_VECTOR(1 downto 0);
     signal r_sub         : BIT_VECTOR(1 downto 0);
 
-    -- saidas pro comparador
+    
     signal comp_lt, comp_eq, comp_gt : bit;
 
-    -- carry outs (nao usados)
+    
     signal co_sum, co_sub : bit;
-
+	 signal load_enable_seguro : bit;
 begin
-    -- registrador do andar atual
+    
+	 load_enable_seguro <= ld_floor and (not comp_eq);
+
     reg_current : reg2
         port map(
             clk => clk,
-            ld  => ld_floor,
+            ld  => load_enable_seguro, 
             clr => clr,
             d   => r_next,
             q   => r_current
         );
 
-    -- registrador do andar chamado
+    
     reg_call_floor : reg2
         port map(
             clk => clk,
@@ -94,7 +92,7 @@ begin
             q   => r_call_floor
         );
 
-    -- comparacao entre current_floor e call_floor
+    
     comp : comparador_2bits
         port map(
             b1 => r_current(1),
@@ -110,7 +108,7 @@ begin
     eq <= comp_eq;
     gt <= comp_gt;
 
-    -- soma com 1
+    
     somador_unitario : somador_2bits
         port map(
             a0 => r_current(0),
@@ -122,7 +120,7 @@ begin
             co => co_sum
         );
 
-    -- subtrai com 1
+    
     subtrator_unitario : subtrator_2bits
         port map(
             a0 => r_current(0),
@@ -134,15 +132,6 @@ begin
             co => co_sub
         );
 
-    ------------------------------------------------------------------------
-    -- Mux 4x1 (implementado por 2 instancias, 1 bit por vez)
-    -- selecao: s1 = comp_gt, s0 = comp_lt
-    -- codificacao usada:
-    --   s1 s0 = 00 -> i0 = manter (r_current)
-    --   s1 s0 = 01 -> i1 = descer (r_sub)
-    --   s1 s0 = 10 -> i2 = subir  (r_sum)
-    --   s1 s0 = 11 -> i3 = manter (r_current)
-    ------------------------------------------------------------------------
     mux_output_0 : Mux4x1
         port map(
             i3 => r_current(0),
