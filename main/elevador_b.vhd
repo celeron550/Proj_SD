@@ -1,7 +1,6 @@
 entity Elevador is
     port (
         clk, clr, call, door_free : in bit;
-        -- cada botao corresponde a um andar diferente
         btn_0, btn_1, btn_2, btn_3 : in bit;
 
         led_up, led_down, led_door : out bit;
@@ -30,7 +29,6 @@ architecture behav of Elevador is
 
     signal w_ld_floor, w_ld_call, w_lt, w_eq, w_gt, w_ctrl_s1, w_ctrl_s0, w_engine : bit;
     
-    -- Sinais para fazer o call ser "automatico"
     signal last_call_floor : BIT_VECTOR(1 downto 0);
     signal auto_call, final_call : bit;
 
@@ -39,25 +37,34 @@ architecture behav of Elevador is
 
 begin
 
-    process (btn_0, btn_1, btn_2, btn_3, clr)
+    process (clk, clr)
     begin
+        
         if clr = '1' then
             call_floor <= "00";
             btn_pressed <= '0';
-        elsif btn_3 = '1' and not (btn_2 = '1' or btn_1 = '1' or btn_0 = '1') then
-            call_floor <= "11";
-            btn_pressed <= '1';
-        elsif btn_2 = '1' and not (btn_3 = '1' or btn_1 = '1' or btn_0 = '1') then
-            call_floor <= "10";
-            btn_pressed <= '1';
-        elsif btn_1 = '1' and not (btn_3 = '1' or btn_2 = '1' or btn_0 = '1') then
-            call_floor <= "01";
-            btn_pressed <= '1';
-        elsif btn_0 = '1' and not (btn_3 = '1' or btn_2 = '1' or btn_1 = '1') then
-            call_floor <= "00";
-            btn_pressed <= '1';
-        else
+            
+        
+        elsif clk'event and clk = '1' then
+           
             btn_pressed <= '0';
+            
+            if btn_3 = '1' and not (btn_2 = '1' or btn_1 = '1' or btn_0 = '1') then
+                call_floor <= "11";
+                btn_pressed <= '1';
+            elsif btn_2 = '1' and not (btn_3 = '1' or btn_1 = '1' or btn_0 = '1') then
+                call_floor <= "10";
+                btn_pressed <= '1';
+            elsif btn_1 = '1' and not (btn_3 = '1' or btn_2 = '1' or btn_0 = '1') then
+                call_floor <= "01";
+                btn_pressed <= '1';
+            elsif btn_0 = '1' and not (btn_3 = '1' or btn_2 = '1' or btn_1 = '1') then
+                call_floor <= "00";
+                btn_pressed <= '1';
+            end if;
+            
+            
+            
         end if;
     end process;
 
